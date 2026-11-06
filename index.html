@@ -1168,7 +1168,7 @@
 </head>
 <body>
 <div id="room" aria-hidden="true"></div>
-<div id="ver" title="Hand control training, version 0.69, 5 Nov 2026">v0.1</div>
+<div id="ver" title="Hand control training, version 0.69, 5 Nov 2026">v0.1.1</div>
 <div id="steps" hidden><span id="handBadge" class="hand"></span><span data-s="reach">1 Reach</span><span data-s="pinch">2 Pinch</span><span data-s="still">3 Hold still</span><span data-s="aim">4 Targets</span><span data-s="fast">5 Fast</span></div>
 <div id="cam" hidden class="c-tr"><video id="vid" playsinline muted></video><canvas id="cv"></canvas></div>
 <div id="cur" hidden></div>
@@ -1197,7 +1197,7 @@
 </div>
 
 <section class="card" id="intro">
-  <h1>Fruit Slicer <span style="font: 0.8rem var(--mono); color: var(--muted)">v0.1 · 5 Nov 2026</span></h1>
+  <h1>Fruit Slicer <span style="font: 0.8rem var(--mono); color: var(--muted)">v0.1.1 · 5 Nov 2026</span></h1>
   <p>
     About a minute of exercises that teach the Planetary Modeling Atlas how <em>your</em> hand moves, so the cursor reaches the
     whole screen, your pinch is read reliably, and buttons are as easy to hit as you need.
@@ -4871,6 +4871,9 @@
       }
       if (typeof CUR !== 'undefined' && CUR && CUR.trail) CUR.trail.length = 0;
     }
+    // ---- fun/visual pass: shared helpers ---------------------------------------
+    // one soft radial white sprite, stamped additively for a cheap faux-bloom / tip spark (B2). Cached.
+    let _glowSp = null;
     function glowSprite() {
       if (_glowSp) return _glowSp;
       const box = 128, c = document.createElement('canvas');
@@ -5112,6 +5115,14 @@
     const CARRY_LEN = 60,
       CARRY_SIZES = [170, 130, 100];
     let C = null;
+    // what is measured is fast movement as the cursor shows it. Each round records the swipes' top speed, the share of
+    // swipes that cut something, how far behind the hand the cursor runs during swipes (the time shift that best lines up
+    // the hand's own path with the cursor's), how far the cursor runs past where the hand stopped, and how often the camera
+    // loses the hand mid-swipe. A gentler version (slower arcs, bigger fruit, an easier speed) is chosen for a shaky hand,
+    // or set with the 🐢 button. The settings are not tuned by this game.
+    const FRUIT_LEN = 60,
+      FRUIT_EMOJI = ['🍉', '🍊', '🍎', '🍋', '🍑', '🥝', '🍐'],
+      FRUIT_R = [30, 40, 52];
     let FG = null;
     function fruitGentleMode() {
       try {
@@ -6172,7 +6183,7 @@
       return {
         format: 'hand-training-replay',
         version: 1,
-        app: 'v0.1',
+        app: 'v0.1.1',
         screen: [innerWidth, innerHeight],
         waist: +WAIST.toFixed(3),
         reach: reach ? { x0: r3(reach.x0), xs: r3(reach.xs), y0: r3(reach.y0), ys: r3(reach.ys) } : null,
